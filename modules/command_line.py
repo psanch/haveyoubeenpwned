@@ -67,12 +67,10 @@ def consume_emails_rate(wait=(60*60*24), n=1):
 
 # 6 - Cat Log Files
 def cat_logs():
-	print("== EMAILS.LOG:", flush=True)
-	os.system('cat ../logs/emails.log')
-	print("== END EMAILS.LOG:\n==", flush=True)
-	print("== BREACHES.LOG:", flush=True)
-	os.system('cat ../logs/breaches.log')
-	print("== END BREACHES.LOG:", flush=True)
+	print("== SYSLOG:", flush=True)
+	os.system('cat /var/log/system.log')
+	print("== END SYSLOG:\n==", flush=True)
+	
 
 # 7 - Clean Databases 
 def init_databases():
@@ -84,16 +82,6 @@ def init_databases():
 	
 	breach_database_definition.init_breaches()
 	email_database_definition.init_emails()
-
-# 8 - Clean breaches logs
-def reset_breaches_logs():
-	fp = open('../logs/breaches.log','w')
-	fp.close()
-
-# 9 - Clean emails logs
-def reset_emails_logs():
-	fp = open('../logs/emails.log','w')
-	fp.close()
 
 
 def main_loop():
@@ -113,8 +101,6 @@ def main_loop():
 	5 - Get all known breaches at a user-defined rate and check emails against new breaches (*BLOCKING PROCESS)
 	6 - Cat Log Files
 	7 - Clean Databases
-	8 - Clean Breaches Log
-	9 - Clean Emails Log
 	Else - Quit
 			"""
 
@@ -133,13 +119,8 @@ def main_loop():
 			consume_emails_rate()
 		elif ui == "6":
 			cat_logs()
-
 		elif ui == "7":
 			init_databases()
-		elif ui == "8":
-			reset_breaches_logs()
-		elif ui == "9":
-			reset_emails_logs()
 		else:
 			os.system('clear')
 			os.system('clear')

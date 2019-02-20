@@ -17,11 +17,11 @@ log_path = "../logs/breaches.log"
 from logbook import Logger, FileHandler, StreamHandler, Processor, SyslogHandler
 
 stream_handler_status_code = StreamHandler(sys.stdout, level='ERROR', bubble=True,\
-	format_string="""[{record.level_name}] {record.channel} {record.message}; 
+	format_string="""[{record.level_name}] {record.channel} {record.message}
 		Status:{record.extra[Status]}""" )
 
 stream_handler = StreamHandler(sys.stdout, level='NOTICE', bubble=True,\
-	format_string="""[{record.level_name}] {record.channel} {record.message};
+	format_string="""[{record.level_name}] {record.channel} {record.message}
 		Domain: {record.extra[Domain]} 
 	""" )
 
