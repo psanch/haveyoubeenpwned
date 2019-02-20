@@ -26,7 +26,7 @@ stream_handler = StreamHandler(sys.stdout, level='NOTICE', bubble=True,\
 	""" )
 
 file_handler = SyslogHandler(application_name="breach_handler", level='WARNING', bubble=True, \
-	format_string="""[{record.level_name}]{record.message}; Name: {record.extra[Name]} Title: {record.extra[Title]} Domain: {record.extra[Domain]} BreachDate: {record.extra[BreachDate]} AddedDate: {record.extra[AddedDate]} ModifiedDate: {record.extra[ModifiedDate]} PwnCount: {record.extra[PwnCount]} Description: {record.extra[Description]} LogoPath: {record.extra[LogoPath]} DataClasses: {record.extra[DataClasses]} IsVerified: {record.extra[IsVerified]} IsFabricated: {record.extra[IsFabricated]} IsSensitive: {record.extra[IsSensitive]} IsRetired: {record.extra[IsRetired]} IsSpamList: {record.extra[IsSpamList]} """)
+	format_string="""[{record.level_name}] {record.message}; Name: {record.extra[Name]} Title: {record.extra[Title]} Domain: {record.extra[Domain]} BreachDate: {record.extra[BreachDate]} AddedDate: {record.extra[AddedDate]} ModifiedDate: {record.extra[ModifiedDate]} PwnCount: {record.extra[PwnCount]} Description: {record.extra[Description]} LogoPath: {record.extra[LogoPath]} DataClasses: {record.extra[DataClasses]} IsVerified: {record.extra[IsVerified]} IsFabricated: {record.extra[IsFabricated]} IsSensitive: {record.extra[IsSensitive]} IsRetired: {record.extra[IsRetired]} IsSpamList: {record.extra[IsSpamList]} """)
 
 log = Logger("HYBP_breaches")
 
