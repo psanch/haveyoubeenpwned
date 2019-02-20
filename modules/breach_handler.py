@@ -14,37 +14,21 @@ log_path = "../logs/breaches.log"
 
 # Logging
 
-from logbook import Logger, FileHandler, StreamHandler, Processor
+from logbook import Logger, FileHandler, StreamHandler, Processor, SyslogHandler
 
 stream_handler_status_code = StreamHandler(sys.stdout, level='ERROR', bubble=True,\
-	format_string="""[{record.level_name} @ {record.time:%Y-%m-%d %H:%M:%S}]{record.channel}: {record.message} 
-		Status: {record.extra[Status]}""" )
+	format_string="""[{record.level_name}] {record.channel} {record.message}; {record.message}
+		Status:{record.extra[Status]}""" )
 
 stream_handler = StreamHandler(sys.stdout, level='NOTICE', bubble=True,\
-	format_string="""[{record.level_name} @ {record.time:%Y-%m-%d %H:%M:%S}]{record.channel}: {record.message}
+	format_string="""[{record.level_name}] {record.channel} {record.message}; {record.message}
 		Domain: {record.extra[Domain]} 
 	""" )
 
-file_handler = FileHandler(log_path, level='WARNING', bubble=True, \
-	format_string="""[{record.level_name} @ {record.time:%Y-%m-%d %H:%M:%S}]{record.channel}: {record.message} 
-		{record.extra[Name]} 
-		{record.extra[Title]} 
-		{record.extra[Domain]} 
-		{record.extra[BreachDate]} 
-		{record.extra[AddedDate]} 
-		{record.extra[ModifiedDate]} 
-		{record.extra[PwnCount]} 
-		{record.extra[Description]} 
-		{record.extra[LogoPath]} 
-		{record.extra[DataClasses]} 
-		{record.extra[IsVerified]} 
-		{record.extra[IsFabricated]} 
-		{record.extra[IsSensitive]} 
-		{record.extra[IsRetired]} 
-		{record.extra[IsSpamList]} 
-	""")
+file_handler = SyslogHandler(application_name="breach_handler", level='WARNING', bubble=True, \
+	format_string="""[{record.level_name}] {record.channel} {record.message}; {record.message} Name: {record.extra[Name]} Title: {record.extra[Title]} Domain: {record.extra[Domain]} BreachDate: {record.extra[BreachDate]} AddedDate: {record.extra[AddedDate]} ModifiedDate: {record.extra[ModifiedDate]} PwnCount: {record.extra[PwnCount]} Description: {record.extra[Description]} LogoPath: {record.extra[LogoPath]} DataClasses: {record.extra[DataClasses]} IsVerified: {record.extra[IsVerified]} IsFabricated: {record.extra[IsFabricated]} IsSensitive: {record.extra[IsSensitive]} IsRetired: {record.extra[IsRetired]} IsSpamList: {record.extra[IsSpamList]} """)
 
-log = Logger("BREACH-HANDLER-LOGGER")
+log = Logger("HYBP_breaches")
 
 # Networking Functions
 
@@ -71,7 +55,7 @@ def get_request_breaches():
 		'User-Agent': 'HaveIBeenPwned Daily Crawler', #API asks for us to specify user agent
 	}
 
-	response = requests.get("https://haveibeenpwned.com/api/v2/breaches", headers = headers)
+	response = requests.get("https://haveibeenpwned.com/api/v2/breaches", headers=headers)
 	response.encoding = 'utf-8'
 
 	if str(response.status_code) == "200":
@@ -215,7 +199,7 @@ def logging_stream_helper(row):
 		
 	with file_handler.applicationbound():
 		with Processor(logging_arguments).applicationbound():
-			log.warning('Breach found! See breaches.log file for more info.')
+			log.warning('Breach found! See syslog file for more info.')
 
 
 def read_and_check_domains(filename='../inputs/domains.txt'):

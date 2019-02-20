@@ -14,26 +14,23 @@ log_path = '../logs/emails.log'
 
 # Logging 
 
-from logbook import Logger, FileHandler, StreamHandler, Processor
+from logbook import Logger, FileHandler, StreamHandler, Processor, SyslogHandler
 
 stream_handler_status_code = StreamHandler(sys.stdout, level='ERROR', bubble=True,\
-	format_string="""[{record.level_name} @ {record.time:%Y-%m-%d %H:%M:%S}]{record.channel}: {record.message} 
+	format_string="""[{record.level_name}] {record.channel} {record.message}; {record.message}
 		Status: {record.extra[Status]}
 		Email: {record.extra[Email]}""" )
 
 stream_handler = StreamHandler(sys.stdout, level='NOTICE', bubble=True,\
-	format_string="""[{record.level_name} @ {record.time:%Y-%m-%d %H:%M:%S}]{record.channel}: {record.message}
+	format_string="""[{record.level_name}] {record.channel} {record.message}; {record.message}
 		Email: {record.extra[Email]}
 		Name: {record.extra[Name]} 
 	""" )
 
-file_handler = FileHandler(log_path, level='WARNING', bubble=True, \
-	format_string="""[{record.level_name} @ {record.time:%Y-%m-%d %H:%M:%S}]{record.channel}: {record.message} 
-		Email: {record.extra[Email]}
-		Name: {record.extra[Name]} 
-	""")
+file_handler = SyslogHandler(application_name="email_handler", level='WARNING', bubble=True, \
+	format_string="""[{record.level_name}] {record.message}; Email: {record.extra[Email]} Name: {record.extra[Name]}""")
 
-log = Logger("EMAIL-HANDLER-LOGGER")
+log = Logger("HYBP_emails")
 
 # Networking Functions
 
@@ -218,7 +215,7 @@ def check_email(email):
 	conn = create_connection()
 	cur = conn.cursor()
 
-	cur.execute("SELECT Email, Name from emails NATURAL JOIN breaches where Email = '{}'".format(email))
+	cur.execute("SELECT Email, Name from emails NATURAL JOIN breaches where upper(Email) = upper('{}')".format(email))
 	rows = cur.fetchall()
 
 	with stream_handler.applicationbound():
