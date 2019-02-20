@@ -22,12 +22,17 @@ def start_k_email_checker_processes(k=1):
 	for email in emailList:
 		emailsToBeChecked.put(email)
 
-	# Spawn a K-Process list targeting the "check_emails_parallel" function
-	# All of them share the emailsToBeChecked Queue as a job queue
-	processes = [ Process(target=email_handler.check_emails_parallel, args=(emailsToBeChecked,)) for i in range(k) ]
+	
+	
 
 	# While the queue is not empty, start processes to pull jobs off the queue and deal with them
 	while not emailsToBeChecked.empty():
+		
+		# Spawn a K-Process list targeting the "check_emails_parallel" function
+		# All of them share the emailsToBeChecked Queue as a job queue
+		# NOTE that it is important that the worker processes are reinitialized to prevent multiple Process.start() calls
+		processes = [ Process(target=email_handler.check_emails_parallel, args=(emailsToBeChecked,)) for i in range(k) ]
+
 		for i in range(k):
 			processes[i].start()
 

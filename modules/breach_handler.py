@@ -5,16 +5,13 @@ import requests as requests
 import time
 import json
 
-# UTF-8 Encode IOStream
 import sys
-#import io
-#sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="UTF-8")
 
 import os.path
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 db_path = os.path.join(BASE_DIR, "../db/breaches.db")
 
-# Logging Setup
+# Breaches Log File Path
 log_path = "../logs/breaches.log"
 
 from logbook import Logger, FileHandler, StreamHandler, Processor

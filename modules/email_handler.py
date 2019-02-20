@@ -3,20 +3,15 @@ from sqlite3 import Error
 
 import requests as requests
 import time
-
 import json
 
-# Make the IO stream UTF-8 encoded for debugging purposes
 import sys
-#import io
-#sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="UTF-8")
 
-import os
 import os.path
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 db_path = os.path.join(BASE_DIR, "../db/breaches.db")
 
-# Logging Setup
+# Emails Log File Path
 log_path = '../logs/emails.log'
 
 from logbook import Logger, FileHandler, StreamHandler, Processor

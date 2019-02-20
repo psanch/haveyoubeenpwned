@@ -15,9 +15,9 @@ import time
 def get_breaches():
 	ret = breach_handler.load_breaches()
 	if ret == True:
-		print("Loading breaches succesful.")
+		print("Loading breaches successful.", flush=True)
 	else:
-		print("Loading breaches unsuccessful.")
+		print("Loading breaches unsuccessful.", flush=True)
 
 # 2
 def check_domains():
@@ -33,10 +33,16 @@ def check_emails():
 
 # 4
 def consume_breaches_daily(wait=(60*60*24)):
-	print("Note that this process will now block.")
+	user_sleep = input("How many seconds between requests? (>= 1.3 as per the API)")
+	if int(wait) >= 1.3:
+		wait = float(user_sleep)
+	else:
+		print("Unexpected number. Defaulting to daily.")
+
 	while(1):
 		get_breaches()
 		time.sleep(wait)
+
 
 # 5
 def init_databases():
@@ -66,7 +72,7 @@ def main_loop():
 	1 - Load breaches from API into Breaches.db
 	2 - Check domains against database (from inputs/domains.txt)
 	3 - Check emails against breaches database (from inputs/emails.txt)
-	4 - Get all known breaches on a daily basis
+	4 - Get all known breaches on a daily basis (*BLOCKING PROCESS)
 	5 - Cat Breaches.log
 	6 - Cat Emails.log
 	7 - Clean Databases

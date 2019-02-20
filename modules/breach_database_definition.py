@@ -4,9 +4,6 @@ from sqlite3 import Error
 import json
 
 import sys
-import io
-#sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="UTF-8")
-
 
 import os.path
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
