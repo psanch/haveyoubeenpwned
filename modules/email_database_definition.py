@@ -24,7 +24,17 @@ def init_emails():
 										FOREIGN KEY (Name) REFERENCES breaches(Name)
 									); """
 
-		cur.execute(emails_table_def)
+		
+		try:
+			cur.execute("DROP TABLE IF EXISTS emails")
+		except Error as e:
+			print(e)
+
+		try:
+			cur.execute(emails_table_def)
+		except Error as e:
+			print(e)
+		
 
 
 def deinit_emails():
@@ -39,6 +49,11 @@ def deinit_emails():
 	with conn:
 
 		cur = conn.cursor()
-		cur.execute("DROP TABLE IF EXISTS emails")
+		
+		try:
+			cur.execute("DROP TABLE IF EXISTS emails")
+		except Error as e:
+			print(e)
+		
 
 
