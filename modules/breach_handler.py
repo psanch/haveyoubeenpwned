@@ -12,6 +12,8 @@ from database_connection import create_connection
 # Breaches Log File Path
 log_path = "../logs/breaches.log"
 
+# Logging
+
 from logbook import Logger, FileHandler, StreamHandler, Processor
 
 stream_handler_status_code = StreamHandler(sys.stdout, level='ERROR', bubble=True,\
@@ -44,11 +46,26 @@ file_handler = FileHandler(log_path, level='WARNING', bubble=True, \
 
 log = Logger("BREACH-HANDLER-LOGGER")
 
+# Networking Functions
 
 def get_request_breaches():
+	""" 
+	Make a HTTP GET request to the HIBP API requesting all known breaches
+	Additionally, handle/log the variety of HTTP Status Codes
+
+	:return: HTTP Response Object (requests library) OR None to indicate failure
+	"""
 	
 	def logging_status_code(record):
+		""" 
+		Use dynamic scoping to add the HTTP Response's status code into the log record.
+		So, response.status_code comes from the HTTP Response in get_request_breaches()
+
+		:param email: str(user email)
+		:return: HTTP Response Object or None
+		"""
 		record.extra['Status'] = response.status_code
+
 
 	headers = {
 		'User-Agent': 'HaveIBeenPwned Daily Crawler', #API asks for us to specify user agent
@@ -60,39 +77,20 @@ def get_request_breaches():
 	if str(response.status_code) == "200":
 		return response
 
-	elif str(response.status_code) == "404":
-		with stream_handler_status_code.applicationbound():
-			with Processor(logging_status_code).applicationbound():
-				log.error("Erroneous status code. Failed to load breaches.")
-		return None
-
-	elif str(response.status_code) == "429": 
-		with stream_handler_status_code.applicationbound():
-			with Processor(logging_status_code).applicationbound():
-				log.error("Erroneous status code. Failed to load breaches.")
-		return None
-
 	else:
 		with stream_handler_status_code.applicationbound():
 			with Processor(logging_status_code).applicationbound():
 				log.error("Erroneous status code. Failed to load breaches.")
 		return None
 
-
-def get_queries_from_breaches(response_text):
-	breach_queries = []
-
-	for breach in response_text:
-		query = (breach['Name'], breach['Title'], breach['Domain'], breach['BreachDate'], breach['AddedDate'], breach['ModifiedDate'], breach['PwnCount'], breach['Description'], breach['LogoPath'], str(breach['DataClasses']), breach['IsVerified'], breach['IsFabricated'], breach['IsSensitive'], breach['IsRetired'], breach['IsSpamList'])
-		breach_queries.append(query)
-
-	return breach_queries
-
+# Database Functions
 
 def insert_or_replace_breaches(conn, breaches):
 	"""
-	conn: db connection object
-	breach: List[breach] - in query format; returned by get_queries_from_breaches
+	Take a list of tuples (structured in query format) and insert/replace them into the database
+
+	:param conn: db connection object
+	:param breaches: List[Tuple(breach[Name], breach[Title], ...)]; returned by get_queries_from_breaches
 	"""
 
 	sql = ''' INSERT OR REPLACE INTO breaches(
@@ -118,22 +116,41 @@ def insert_or_replace_breaches(conn, breaches):
 	for breach in breaches:
 		try:
 			cur.execute(sql, breach)
+
+			# Commit changes to database every time a change is made
+			# Minimizes data loss at expense of (constant amount) of performance
+			conn.commit()
+
 		except Error as e:
 			print(e)
-
-	conn.commit()
 
 	return
 
 
-def check_domain(domain):
+def lookup_domain(domain):
+	"""
+	Check a domain against our database of known breaches
+	Log a NOTICE if no breach found. (Only to stream)
+	Log a WARNING if breach found. 
+	Log blurb goes into stream. Entire log goes into log file.
+
+	:param domain: str(URL)
+	"""
+
 	conn = create_connection()
 	cur = conn.cursor()
 
+	# Case sensitivity has to be handled since no control over user/API formatting
 	cur.execute("SELECT * from breaches where upper(Domain) = upper('{}')".format(domain))
 	rows = cur.fetchall()
 
 	def logging_no_arguments(record):
+		""" 
+		Use dynamic scoping to inject the domain argument into the log record.
+		So "domain" on the RHS of the '=' comes from the lookup_domain(domain) argument.
+		
+		:param record: log record
+		"""
 		record.extra['Domain'] = domain
 
 	with stream_handler.applicationbound():
@@ -142,10 +159,44 @@ def check_domain(domain):
 				log.notice('No breaches found for domain. ')
 		else:
 			for row in rows:
+
+				# Helper to prevent excessive nesting/indentation
 				logging_stream_helper(row)
 
+
+# Helper Functions
+
+def get_queries_from_breaches(response_text):
+	"""
+	Take HTTP Response JSON data and format it into tuples for insertion into database.
+
+	:param response_text: HTTP_Response.text passed in as a JSON object
+	:return: List[Tuples()] where the tuples hold the different columns of a given breach
+	"""
+	breach_queries = []
+
+	for breach in response_text:
+		query = (breach['Name'], breach['Title'], breach['Domain'], breach['BreachDate'], breach['AddedDate'], breach['ModifiedDate'], breach['PwnCount'], breach['Description'], breach['LogoPath'], str(breach['DataClasses']), breach['IsVerified'], breach['IsFabricated'], breach['IsSensitive'], breach['IsRetired'], breach['IsSpamList'])
+		breach_queries.append(query)
+
+	return breach_queries
+
+
 def logging_stream_helper(row):
+	"""
+	Helper function to log a detected breach for a given domain.
+
+	:param row: List[] returned from SQL SELECT query. Contains the columns of a given breach.
+	"""
+
 	def logging_arguments(record):
+		""" 
+		Use dynamic scoping to load the contents of logging_stream_helper(row)'s "row" argument into log record
+		So, row[] used below is the argument to logging_stream_helper
+
+		:param record: log record
+		"""
+
 		record.extra['Name'] = row[0]		#['Name']
 		record.extra['Title'] = row[1]		#['Title']
 		record.extra['Domain'] = row[2]		#['Domain']
@@ -165,30 +216,46 @@ def logging_stream_helper(row):
 	with file_handler.applicationbound():
 		with Processor(logging_arguments).applicationbound():
 			log.warning('Breach found! See breaches.log file for more info.')
-		
+
+
 def read_and_check_domains(filename='../inputs/domains.txt'):
+	"""
+	Check a domain against our database of known breaches.
+	Log a NOTICE if no breach found.
+	Log a WARNING if breach found. 
+	Log blurb goes into stream. Entire log goes into log file.
+
+	:param domain: str(URL)
+	"""
 	with open(filename) as fp:
 		domains = fp.read().splitlines()
 
 		for domain in domains:
-			check_domain(domain)
+			lookup_domain(domain)
 
 # Standalone Functions
 
 def load_breaches():
-	# Make a GET request to 
+	"""
+	Function that takes data from HIBP API and loads it into Database.
+	Specifically, HTTP GET Request -> HTTP Response -> JSON -> List[Tuples] -> Database
+
+	:return: True if succesful, False otherwise.
+	"""
+
+	# HTTP GET request
 	httpResponse = get_request_breaches()
 	if httpResponse == None:
 		return False
 
+	# Process raw text into JSON object
 	jsonData = json.loads(httpResponse.text)
 
 	# List of breaches into query format for insertion into SQLite
 	queryList = get_queries_from_breaches(jsonData)
 
-	# create a database connection and cursor
+	# Connect to and insert to database
 	conn = create_connection()
-
 	insert_or_replace_breaches(conn, queryList)
 
 	return True

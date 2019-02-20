@@ -3,24 +3,36 @@ from sqlite3 import Error
 
 from database_connection import create_connection
 
-def init_emails():
 
-	# create a database connection
+def init_emails():
+	""" 
+	Initalizes emails table in breaches.db
+	
+	:return: None
+	"""
+
 	conn = create_connection()
 	with conn:
 
 		cur = conn.cursor()
 
+		#define emails table schema
 		emails_table_def = """ CREATE TABLE IF NOT EXISTS emails(
-										Email varchar,
-										Name varchar,
+										Email varchar NOT NULL,
+										Name varchar NOT NULL,
 										PRIMARY KEY(Email, Name),
 										FOREIGN KEY (Name) REFERENCES breaches(Name)
 									); """
 
 		cur.execute(emails_table_def)
 
+
 def deinit_emails():
+	""" 
+	Delete emails table in breaches.db
+	
+	:return: None
+	"""
 
 	# create a database connection
 	conn = create_connection()
@@ -28,11 +40,5 @@ def deinit_emails():
 
 		cur = conn.cursor()
 		cur.execute("DROP TABLE IF EXISTS emails")
-
-
-
-
-
-
 
 
