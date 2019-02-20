@@ -17,12 +17,12 @@ log_path = '../logs/emails.log'
 from logbook import Logger, FileHandler, StreamHandler, Processor, SyslogHandler
 
 stream_handler_status_code = StreamHandler(sys.stdout, level='ERROR', bubble=True,\
-	format_string="""[{record.level_name}] {record.channel} {record.message}; {record.message}
+	format_string="""[{record.level_name}] {record.channel} {record.message};
 		Status: {record.extra[Status]}
 		Email: {record.extra[Email]}""" )
 
 stream_handler = StreamHandler(sys.stdout, level='NOTICE', bubble=True,\
-	format_string="""[{record.level_name}] {record.channel} {record.message}; {record.message}
+	format_string="""[{record.level_name}] {record.channel} {record.message}; 
 		Email: {record.extra[Email]}
 		Name: {record.extra[Name]} 
 	""" )
