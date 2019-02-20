@@ -7,9 +7,7 @@ import json
 
 import sys
 
-import os.path
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-db_path = os.path.join(BASE_DIR, "../db/breaches.db")
+from database_connection import create_connection
 
 # Breaches Log File Path
 log_path = "../logs/breaches.log"
@@ -45,21 +43,6 @@ file_handler = FileHandler(log_path, level='WARNING', bubble=True, \
 	""")
 
 log = Logger("BREACH-HANDLER-LOGGER")
-
-	
-def create_connection(db_file):
-	""" create a database connection to the SQLite database
-		specified by the db_file
-	:param db_file: database file
-	:return: Connection object or None
-	"""
-	try:
-		conn = sqlite3.connect(db_file)
-		return conn
-	except Error as e:
-		print(e)
-
-	return None
 
 
 def get_request_breaches():
@@ -144,7 +127,7 @@ def insert_or_replace_breaches(conn, breaches):
 
 
 def check_domain(domain):
-	conn = create_connection(db_path)
+	conn = create_connection()
 	cur = conn.cursor()
 
 	cur.execute("SELECT * from breaches where upper(Domain) = upper('{}')".format(domain))
@@ -204,7 +187,7 @@ def load_breaches():
 	queryList = get_queries_from_breaches(jsonData)
 
 	# create a database connection and cursor
-	conn = create_connection(db_path)
+	conn = create_connection()
 
 	insert_or_replace_breaches(conn, queryList)
 

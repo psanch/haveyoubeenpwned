@@ -1,34 +1,12 @@
 import sqlite3
 from sqlite3 import Error
 
-import json
-
-import sys
-
-import os.path
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-db_path = os.path.join(BASE_DIR, "../db/breaches.db")
-
-
-def create_connection(db_file):
-	""" create a database connection to the SQLite database
-		specified by the db_file
-	:param db_file: database file
-	:return: Connection object or None
-	"""
-	try:
-		conn = sqlite3.connect(db_file)
-		return conn
-	except Error as e:
-		print(e)
-
-	return None
-
+from database_connection import create_connection
 
 def init_emails():
 
 	# create a database connection
-	conn = create_connection(db_path)
+	conn = create_connection()
 	with conn:
 
 		cur = conn.cursor()
@@ -45,7 +23,7 @@ def init_emails():
 def deinit_emails():
 
 	# create a database connection
-	conn = create_connection(db_path)
+	conn = create_connection()
 	with conn:
 
 		cur = conn.cursor()

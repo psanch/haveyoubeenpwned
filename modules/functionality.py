@@ -25,11 +25,11 @@ def check_domains():
 
 # 3
 def check_emails():
-	number_processes = input("How many worker processes would you like to have?\n")
-	if int(number_processes) <= 0:
-		print("Error: Number of processes cannot be negative.")
-	else:
+	number_processes = input("How many worker processes would you like to have? (1 <= X <= 16)\n")
+	if int(number_processes) >= 1 and int(number_processes) <= 16:
 		multiprocess_email_handler.start_k_email_checker_processes(int(number_processes))
+	else:
+		print("Error: Invalid number of processes.")
 
 # 4
 def consume_breaches_daily(wait=(60*60*24)):
@@ -42,7 +42,6 @@ def consume_breaches_daily(wait=(60*60*24)):
 	while(1):
 		get_breaches()
 		time.sleep(wait)
-
 
 # 5
 def init_databases():
@@ -80,6 +79,7 @@ def main_loop():
 	9 - Clean Emails Log
 	Else - Quit
 			"""
+			
 		ui = input(prompt)
 
 		if ui == "1":

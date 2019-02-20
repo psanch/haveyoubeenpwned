@@ -7,9 +7,7 @@ import json
 
 import sys
 
-import os.path
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-db_path = os.path.join(BASE_DIR, "../db/breaches.db")
+from database_connection import create_connection
 
 # Emails Log File Path
 log_path = '../logs/emails.log'
@@ -34,21 +32,6 @@ file_handler = FileHandler(log_path, level='WARNING', bubble=True, \
 	""")
 
 log = Logger("EMAIL-HANDLER-LOGGER")
-
-
-def create_connection(db_file):
-	""" create a database connection to the SQLite database
-		specified by the db_file
-	:param db_file: database file
-	:return: Connection object or None
-	"""
-	try:
-		conn = sqlite3.connect(db_file)
-		return conn
-	except Error as e:
-		print(e)
-
-	return None
 
 
 def get_request_emails(email):
@@ -135,7 +118,7 @@ def check_emails_parallel(emailQueue):
 	queryList = get_queries_from_emails(jsonData, email)
 
 	# create a database connection
-	conn = create_connection(db_path)
+	conn = create_connection()
 	cur = conn.cursor()
 
 	insert_or_replace_emails(conn, queryList)
@@ -168,7 +151,7 @@ def lookup_email(email):
 	def logging_no_arguments(record):
 		record.extra['Email'] = email
 
-	conn = create_connection(db_path)
+	conn = create_connection()
 	cur = conn.cursor()
 
 	cur.execute("SELECT Email, Name from emails NATURAL JOIN breaches where Email = '{}'".format(email))
