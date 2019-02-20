@@ -32,7 +32,7 @@ def start_k_email_checker_processes(k=1):
 		# Spawn a K-Process list targeting the "check_emails_parallel" function
 		# All of them share the emailsToBeChecked Queue as a job queue
 		# NOTE that it is important that the worker processes are reinitialized to prevent multiple Process.start() calls
-		processes = [ Process(target=email_handler.load_emails_parallel, args=(emailsToBeChecked,)) for i in range(k) ]
+		processes = [ Process(target=email_handler.get_emails_parallel, args=(emailsToBeChecked,)) for i in range(k) ]
 
 		for i in range(k):
 			processes[i].start()
@@ -40,9 +40,9 @@ def start_k_email_checker_processes(k=1):
 		for i in range(k):
 			processes[i].join()
 
-	# After worker processes done, lookup each email in the database and log if there are relevant breaches
+	# After worker processes done, check each email in the database and log if there are relevant breaches
 	for email in emailList:
-		email_handler.lookup_email(email)
+		email_handler.check_email(email)
 
 
 

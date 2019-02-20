@@ -156,7 +156,7 @@ def logging_stream_helper(row):
 
 # Multiprocessing functions
 
-def load_emails_parallel(emailQueue):
+def get_emails_parallel(emailQueue):
 	""" 
 	A process to load the HTTP Response from a query for a given email into the database
 	NOTE that this function relies on emailQueue being a process-safe Queue
@@ -194,7 +194,7 @@ def load_emails_parallel(emailQueue):
 
 # Standalone Functions
 
-def lookup_email(email):
+def check_email(email):
 	""" 
 	Function that looks up a given email in our database and logs any relevant breaches found
 	Log a NOTICE if no breach found. (Only to stream)
@@ -209,7 +209,7 @@ def lookup_email(email):
 	def logging_no_arguments(record):
 		""" 
 		Use dynamic scoping to include email as part of the log record
-		So, email comes from the argument to lookup_email()
+		So, email comes from the argument to check_email()
 
 		:param record: log record
 		"""
