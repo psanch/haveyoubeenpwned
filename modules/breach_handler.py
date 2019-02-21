@@ -125,7 +125,12 @@ def lookup_domain(domain):
 	cur = conn.cursor()
 
 	# Case sensitivity has to be handled since no control over user/API formatting
-	cur.execute("SELECT * from breaches where upper(Domain) = upper('{}')".format(domain))
+	try:
+		cur.execute("SELECT * from breaches where upper(Domain) = upper('{}')".format(domain))
+
+	except Error as e:
+		print(e)
+
 	rows = cur.fetchall()
 
 	def logging_no_arguments(record):
@@ -243,5 +248,11 @@ def load_breaches():
 	insert_or_replace_breaches(conn, queryList)
 
 	return True
+
+# Test functions
+
+def test_load_breaches():
+	assert(load_breaches() == True, "load_breaches() failed to get response from server")
+
 
 

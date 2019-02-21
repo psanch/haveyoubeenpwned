@@ -29,8 +29,17 @@ def init_breaches():
 										LogoPath varchar NOT NULL
 									); """
 
-		cur.execute("DROP TABLE IF EXISTS breaches")
-		cur.execute(breaches_table_def)
+		try:
+			cur.execute("DROP TABLE IF EXISTS breaches")
+		except Error as e:
+			print(e)
+
+		try:
+			cur.execute(breaches_table_def)
+		except Error as e:
+			print(e)
+		
+		
 
 def deinit_breaches():
 
@@ -38,8 +47,11 @@ def deinit_breaches():
 	conn = create_connection()
 	with conn:
 		cur = conn.cursor()
-		cur.execute("DROP TABLE IF EXISTS breaches")
-
+		
+		try:
+			cur.execute("DROP TABLE IF EXISTS breaches")
+		except Error as e:
+			print(e)
 
 
 

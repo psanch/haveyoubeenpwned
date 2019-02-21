@@ -129,3 +129,18 @@ def main_loop():
 		input("\nPress Enter to continue.")
 
 main_loop()
+
+# Test Functions
+
+def test_main_loop(num_processes=1):
+	init_databases()
+	
+	get_breaches()
+
+	check_domains()
+
+	check_emails(num_processes)
+
+	cat_logs()
+
+	init_databases()

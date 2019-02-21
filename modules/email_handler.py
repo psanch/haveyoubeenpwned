@@ -215,7 +215,11 @@ def check_email(email):
 	conn = create_connection()
 	cur = conn.cursor()
 
-	cur.execute("SELECT Email, Name from emails NATURAL JOIN breaches where upper(Email) = upper('{}')".format(email))
+	try:
+		cur.execute("SELECT Email, Name from emails NATURAL JOIN breaches where upper(Email) = upper('{}')".format(email))
+	except Error as e:
+		print(e)
+
 	rows = cur.fetchall()
 
 	with stream_handler.applicationbound():
@@ -225,5 +229,12 @@ def check_email(email):
 		else:
 			for row in rows:
 				logging_stream_helper(row)
+
+	return True
+
+# Test Functions
+
+def test_check_email(email="jeff@amazon.com"):
+	assert(check_email(email) == True, "check_email failed.")
 
 
